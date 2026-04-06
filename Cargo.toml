@@ -5,6 +5,7 @@ members = [
     "packages/web",
     "packages/desktop",
     "packages/mobile",
+    "packages/native",
 ]
 
 [workspace.dependencies]

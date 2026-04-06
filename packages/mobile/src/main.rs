@@ -15,37 +15,30 @@ enum Route {
     Blog { id: i32 },
 }
 
-const MAIN_CSS: Asset = asset!("/assets/main.css");
-
 fn main() {
     dioxus::launch(App);
 }
 
 #[component]
 fn App() -> Element {
-    // Build cool things ✌️
-
     rsx! {
-        // Global app resources
         document::Stylesheet { href: asset!("/assets/tailwind.css") }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-
         Router::<Route> {}
     }
 }
 
-/// A mobile-specific Router around the shared `Navbar` component
-/// which allows us to use the mobile-specific `Route` enum.
 #[component]
 fn MobileNavbar() -> Element {
     rsx! {
         Navbar {
             Link {
                 to: Route::Home {},
+                class: "text-white hover:text-blue-400 transition-colors",
                 "Home"
             }
             Link {
                 to: Route::Blog { id: 1 },
+                class: "text-white hover:text-blue-400 transition-colors",
                 "Blog"
             }
         }

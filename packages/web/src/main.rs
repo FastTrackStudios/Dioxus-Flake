@@ -16,7 +16,6 @@ enum Route {
 }
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
-const MAIN_CSS: Asset = asset!("/assets/main.css");
 
 fn main() {
     dioxus::launch(App);
@@ -24,30 +23,25 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    // Build cool things ✌️
-
     rsx! {
-        // Global app resources
         document::Link { rel: "icon", href: FAVICON }
         document::Stylesheet { href: asset!("/assets/tailwind.css") }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-
         Router::<Route> {}
     }
 }
 
-/// A web-specific Router around the shared `Navbar` component
-/// which allows us to use the web-specific `Route` enum.
 #[component]
 fn WebNavbar() -> Element {
     rsx! {
         Navbar {
             Link {
                 to: Route::Home {},
+                class: "text-white hover:text-blue-400 transition-colors",
                 "Home"
             }
             Link {
                 to: Route::Blog { id: 1 },
+                class: "text-white hover:text-blue-400 transition-colors",
                 "Blog"
             }
         }
