@@ -23,16 +23,18 @@
       ...
     }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
+      # No x86_64-darwin: nixpkgs 26.11 dropped it as a host. An Intel Mac
+      # build target (`x86_64-apple-darwin`) still cross-compiles from
+      # aarch64-darwin with the rust target.
       systems = [
         "x86_64-linux"
-        "x86_64-darwin"
         "aarch64-darwin"
         "aarch64-linux"
       ];
 
       flake = {
         lib =
-          inputs.nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" "aarch64-linux" ]
+          inputs.nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" ]
             (
               system:
               let
@@ -61,9 +63,13 @@
         }:
         let
           # ── Rust toolchain ───────────────────────────────────────────
+          # The fleet's rust (architect `skills/architect/references/xtask-tooling.md`,
+          # "Fleet toolchain"): every FTS repo's rust-toolchain.toml pins 1.99.1
+          # and follows this flake's nixpkgs and rust-overlay, so one rustc,
+          # linker and libc build every repo and kache shares their crates.
           # Android targets included so cross-compilation works when
           # ANDROID_NDK_HOME is set on the host system.
-          rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+          rustToolchain = pkgs.rust-bin.stable."1.99.1".default.override {
             extensions = [
               "rust-src"
               "rust-analyzer"
