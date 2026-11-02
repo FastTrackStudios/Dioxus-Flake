@@ -63,12 +63,18 @@
         }:
         let
           # ── Rust toolchain ───────────────────────────────────────────
-          # The fleet's rust (architect `skills/architect/references/xtask-tooling.md`,
-          # "Fleet toolchain"): every FTS repo's rust-toolchain.toml pins 1.99.1
-          # and follows this flake's nixpkgs and rust-overlay, so one rustc,
-          # linker and libc build every repo and kache shares their crates.
-          # Android targets included so cross-compilation works when
-          # ANDROID_NDK_HOME is set on the host system.
+          # The fleet's rust, `packages.<system>.fleet-rust` (architect
+          # `skills/architect/references/xtask-tooling.md`, "Fleet
+          # toolchain"). Every FTS repo builds with this one derivation, so
+          # every shell has the same rustc store path, and this flake's
+          # nixpkgs gives them one linker, glibc and C runtime: kache keys
+          # binaries and proc macros on those and shares them across repos.
+          # The version is the fleet's rust-toolchain.toml pin; the targets
+          # are every repo's union (a target a repo does not build costs a
+          # download, never a rebuild): wasm for the web apps, Android for
+          # `dx build --platform android` (ANDROID_NDK_HOME from the host),
+          # and on darwin iOS (device, simulator) plus Intel macOS, which
+          # Apple Silicon cross-compiles.
           rustToolchain = pkgs.rust-bin.stable."1.99.1".default.override {
             extensions = [
               "rust-src"
@@ -82,6 +88,11 @@
               "armv7-linux-androideabi"
               "x86_64-linux-android"
               "i686-linux-android"
+            ]
+            ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+              "aarch64-apple-ios"
+              "aarch64-apple-ios-sim"
+              "x86_64-apple-darwin"
             ];
           };
 
@@ -271,6 +282,8 @@
           # Packages
           # ============================================================
           packages = {
+            fleet-rust = rustToolchain;
+
             deps = cargoArtifacts;
 
             # Web app (WASM via dx)
